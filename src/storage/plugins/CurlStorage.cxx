@@ -193,7 +193,7 @@ ParseTimeStamp(const char *s)
 {
 	try {
 		// TODO: make this more robust
-		return ParseTimePoint(s, "%a, %d %b %Y %T");
+		return ParseTimePoint(s, "%a, %d %b %Y %T %Z");
 	} catch (...) {
 		return std::chrono::system_clock::time_point::min();
 	}
@@ -278,6 +278,7 @@ public:
 				  "<a:resourcetype/>"
 				  "<a:getcontenttype/>"
 				  "<a:getcontentlength/>"
+				  "<a:getlastmodified/>"
 				  "</a:prop>"
 				  "</a:propfind>");
 	}
