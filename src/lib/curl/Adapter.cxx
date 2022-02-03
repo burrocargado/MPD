@@ -30,6 +30,7 @@
 #include "Adapter.hxx"
 #include "Easy.hxx"
 #include "Handler.hxx"
+#include "Error.hxx"
 #include "util/CharUtil.hxx"
 #include "util/RuntimeError.hxx"
 #include "util/StringStrip.hxx"
@@ -164,6 +165,7 @@ inline std::size_t
 CurlResponseHandlerAdapter::DataReceived(const void *ptr,
 					 std::size_t received_size) noexcept
 {
+	std::exception_ptr ep;
 	assert(received_size > 0);
 
 	try {
@@ -172,6 +174,13 @@ CurlResponseHandlerAdapter::DataReceived(const void *ptr,
 		return received_size;
 	} catch (CurlResponseHandler::Pause) {
 		return CURL_WRITEFUNC_PAUSE;
+	} catch (const HttpStatusError &e) {
+		ep = std::current_exception();
+		if (e.GetStatus() == 404)
+			 return 0;
+	}
+	if (ep) {
+		std::rethrow_exception(ep);
 	}
 
 }
