@@ -29,6 +29,7 @@
 #include "lib/curl/Request.hxx"
 #include "lib/curl/Handler.hxx"
 #include "lib/curl/Escape.hxx"
+#include "lib/curl/Error.hxx"
 #include "lib/expat/ExpatParser.hxx"
 #include "fs/Traits.hxx"
 #include "event/InjectEvent.hxx"
@@ -300,6 +301,10 @@ private:
 	/* virtual methods from CurlResponseHandler */
 	void OnHeaders(unsigned status,
 		       std::multimap<std::string, std::string> &&headers) final {
+		if (status < 200 || status >= 300)
+			throw HttpStatusError(status,
+				StringFormat<40>("got HTTP status %u",
+					status).c_str());
 		if (status != 207)
 			throw FormatRuntimeError("Status %d from WebDAV server; expected \"207 Multi-Status\"",
 						 status);
